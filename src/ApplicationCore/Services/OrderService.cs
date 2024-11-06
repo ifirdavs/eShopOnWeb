@@ -1,6 +1,9 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
 using Ardalis.GuardClauses;
+using System.Net.Http;
+using System.Text;
+using System.Text.Json;
 using Microsoft.eShopWeb.ApplicationCore.Entities;
 using Microsoft.eShopWeb.ApplicationCore.Entities.BasketAggregate;
 using Microsoft.eShopWeb.ApplicationCore.Entities.OrderAggregate;
@@ -49,5 +52,34 @@ public class OrderService : IOrderService
         var order = new Order(basket.BuyerId, shippingAddress, items);
 
         await _orderRepository.AddAsync(order);
+
+        // Send order details to Azure Function
+        await SendOrderDetailsToFunctionAsync(order);
+    }
+
+    private async Task SendOrderDetailsToFunctionAsync(Order order)
+    {
+        // Replace with your Azure Function URL
+        string functionUrl = "https://orderreserverfunction.azurewebsites.net/api/OrderItemsReserver?code=3yfrHn9_BtQ-GAUvPL7VIn4xcqxpXVdluUDRM0IrGVLLAzFuQtb5eg%3D%3D";
+
+        using (var httpClient = new HttpClient())
+        {
+            var orderDetails = new
+            {
+                OrderId = order.Id,
+                Items = order.OrderItems.Select(item => new
+                {
+                    ItemId = item.ItemOrdered.CatalogItemId,
+                    ItemName = item.ItemOrdered.ProductName,
+                    Quantity = item.Units
+                })
+            };
+
+            string json = JsonSerializer.Serialize(orderDetails);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await httpClient.PostAsync(functionUrl, content);
+            response.EnsureSuccessStatusCode();
+        }
     }
 }

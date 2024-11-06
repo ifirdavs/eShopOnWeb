@@ -32,6 +32,8 @@ builder.Configuration.AddConfigurationFile("appsettings.test.json");
 // Add Application Insights
 builder.Services.AddApplicationInsightsTelemetry();
 builder.Logging.AddConsole();
+builder.Logging.AddDebug();
+builder.Logging.SetMinimumLevel(LogLevel.Information);
 
 Microsoft.eShopWeb.Infrastructure.Dependencies.ConfigureServices(builder.Configuration, builder.Services);
 
