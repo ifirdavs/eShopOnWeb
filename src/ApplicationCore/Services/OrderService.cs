@@ -9,6 +9,7 @@ using Microsoft.eShopWeb.ApplicationCore.Entities.BasketAggregate;
 using Microsoft.eShopWeb.ApplicationCore.Entities.OrderAggregate;
 using Microsoft.eShopWeb.ApplicationCore.Interfaces;
 using Microsoft.eShopWeb.ApplicationCore.Specifications;
+using System.Net.Http.Json;
 
 namespace Microsoft.eShopWeb.ApplicationCore.Services;
 
@@ -54,32 +55,32 @@ public class OrderService : IOrderService
         await _orderRepository.AddAsync(order);
 
         // Send order details to Azure Function
-        await SendOrderDetailsToFunctionAsync(order);
+        await SendShippingDetailsToFunctionAsync(order);
     }
 
-    private async Task SendOrderDetailsToFunctionAsync(Order order)
+    private async Task SendShippingDetailsToFunctionAsync(Order order)
     {
-        // Replace with your Azure Function URL
-        string functionUrl = "https://orderreserverfunction.azurewebsites.net/api/OrderItemsReserver?code=3yfrHn9_BtQ-GAUvPL7VIn4xcqxpXVdluUDRM0IrGVLLAzFuQtb5eg%3D%3D";
-
-        using (var httpClient = new HttpClient())
+        // Azure Function URL
+        string functionUrl = "https://deliveryorderprocessor.azurewebsites.net/api/OrderDeliverySaver?code=JCTB60MoAtT3ao4hwRrh7iwH-8aRpvq8GfNUHz7hn3ooAzFunAw_6g%3D%3D";
+        using var client = new HttpClient();
+        var payload = new
         {
-            var orderDetails = new
+            OrderId = order.Id,
+            ShippingAddress = order.ShipToAddress,
+            Items = order.OrderItems.Select(i => new
             {
-                OrderId = order.Id,
-                Items = order.OrderItems.Select(item => new
-                {
-                    ItemId = item.ItemOrdered.CatalogItemId,
-                    ItemName = item.ItemOrdered.ProductName,
-                    Quantity = item.Units
-                })
-            };
+                ItemId = i.ItemOrdered.CatalogItemId,
+                ItemName = i.ItemOrdered.ProductName,
+                UnitPrice = i.UnitPrice,
+                Quantity = i.Units
+            }),
+            FinalPrice = order.OrderItems.Sum(i => i.UnitPrice * i.Units)
+        };
 
-            string json = JsonSerializer.Serialize(orderDetails);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
+        string json = JsonSerializer.Serialize(payload);
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await httpClient.PostAsync(functionUrl, content);
-            response.EnsureSuccessStatusCode();
-        }
+        var response = await client.PostAsync(functionUrl, content);
+        response.EnsureSuccessStatusCode();
     }
 }
