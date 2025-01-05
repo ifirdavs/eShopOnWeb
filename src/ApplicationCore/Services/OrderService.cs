@@ -4,6 +4,7 @@ using Ardalis.GuardClauses;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
+using Azure.Messaging.ServiceBus;
 using Microsoft.eShopWeb.ApplicationCore.Entities;
 using Microsoft.eShopWeb.ApplicationCore.Entities.BasketAggregate;
 using Microsoft.eShopWeb.ApplicationCore.Entities.OrderAggregate;
@@ -19,8 +20,11 @@ public class OrderService : IOrderService
     private readonly IUriComposer _uriComposer;
     private readonly IRepository<Basket> _basketRepository;
     private readonly IRepository<CatalogItem> _itemRepository;
+    private readonly ServiceBusClient _serviceBusClient;
+    private const string _topicName = "ordercreated";
 
-    public OrderService(IRepository<Basket> basketRepository,
+    public OrderService(
+        IRepository<Basket> basketRepository,
         IRepository<CatalogItem> itemRepository,
         IRepository<Order> orderRepository,
         IUriComposer uriComposer)
@@ -29,6 +33,7 @@ public class OrderService : IOrderService
         _uriComposer = uriComposer;
         _basketRepository = basketRepository;
         _itemRepository = itemRepository;
+        _serviceBusClient = new ServiceBusClient("ConnectionString");    // <-- Replace with your Service Bus connection string
     }
 
     public async Task CreateOrderAsync(int basketId, Address shippingAddress)
@@ -55,7 +60,28 @@ public class OrderService : IOrderService
         await _orderRepository.AddAsync(order);
 
         // Send order details to Azure Function
+        await SendOrderDetailsToFunctionAsync(order);
+
+        // Send order shipping details to Azure Function
         await SendShippingDetailsToFunctionAsync(order);
+    }
+
+    private async Task SendOrderDetailsToFunctionAsync(Order order)
+    {
+        // Service Bus Topic
+        var sender = _serviceBusClient.CreateSender(_topicName);
+        var orderDetails = new
+        {
+            OrderId = order.Id,
+            Items = order.OrderItems.Select(item => new
+            {
+                ItemId = item.ItemOrdered.CatalogItemId,
+                ItemName = item.ItemOrdered.ProductName,
+                Quantity = item.Units
+            })
+        };
+        var message = new ServiceBusMessage(JsonSerializer.Serialize(orderDetails));
+        await sender.SendMessageAsync(message);
     }
 
     private async Task SendShippingDetailsToFunctionAsync(Order order)

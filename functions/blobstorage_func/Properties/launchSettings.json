@@ -1,8 +1,8 @@
 {
   "profiles": {
-    "functions": {
+    "blobstorage_func": {
       "commandName": "Project",
-      "commandLineArgs": "--port 7165",
+      "commandLineArgs": "--port 7164",
       "launchBrowser": false
     }
   }

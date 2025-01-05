@@ -37,7 +37,7 @@ namespace Company.Function
                 }
 
                 // Add the required id field for Cosmos DB
-                orderDetails.id = Guid.NewGuid().ToString();
+                orderDetails.id = $"order-{orderDetails.OrderId}-{Guid.NewGuid()}";
 
                 var container = _cosmosClient.GetContainer("deliverydb", "orders");
                 await container.CreateItemAsync(orderDetails);
