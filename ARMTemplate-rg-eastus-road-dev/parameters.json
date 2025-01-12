@@ -1,0 +1,69 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "webhooks_webappeshoppublicproject_serviceUri": {
+            "value": null
+        },
+        "webhooks_webappeshopwebproject_serviceUri": {
+            "value": null
+        },
+        "vulnerabilityAssessments_Default_storageContainerPath": {
+            "value": null
+        },
+        "sites_eshopwebeastus_name": {
+            "value": null
+        },
+        "connections_outlook_2_name": {
+            "value": null
+        },
+        "sites_eshoponpublicapi_name": {
+            "value": null
+        },
+        "servers_eshoponsqlserver_name": {
+            "value": null
+        },
+        "workflows_eshoplogicapp_name": {
+            "value": null
+        },
+        "sites_orderitemsreserverr_name": {
+            "value": null
+        },
+        "namespaces_eshopweb_name": {
+            "value": null
+        },
+        "vaults_eshopwebkeyvault_name": {
+            "value": null
+        },
+        "sites_deliveryorderprocessor_name": {
+            "value": null
+        },
+        "serverfarms_Planhmuwl4o4mpj2s_name": {
+            "value": null
+        },
+        "registries_eshopweb_name": {
+            "value": null
+        },
+        "serverfarms_Web20250112161756Plan_name": {
+            "value": null
+        },
+        "serverfarms_ASP_rgeastusroaddev_abbf_name": {
+            "value": null
+        },
+        "serverfarms_ASP_rgeastusroaddev_bead_name": {
+            "value": null
+        },
+        "storageAccounts_eshopstorageeastus_name": {
+            "value": null
+        },
+        "trafficManagerProfiles_eshoptrafficmanager_name": {
+            "value": null
+        },
+        "actionGroups_Application_Insights_Smart_Detection_name": {
+            "value": null
+        },
+        "sites_eshopwebcentralus_externalid": {
+            "value": null
+        }
+    }
+}
