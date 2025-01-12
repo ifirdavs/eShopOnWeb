@@ -33,7 +33,7 @@ public class OrderService : IOrderService
         _uriComposer = uriComposer;
         _basketRepository = basketRepository;
         _itemRepository = itemRepository;
-        _serviceBusClient = new ServiceBusClient("ConnectionString");    // <-- Replace with your Service Bus connection string
+        _serviceBusClient = new ServiceBusClient("Endpoint=sb://eshopweb.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=1p5BCvx1W5E85HKOHxwejBZ7X/jNltey+ASbElp+8s=");
     }
 
     public async Task CreateOrderAsync(int basketId, Address shippingAddress)
